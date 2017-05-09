@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+require 'berlin_anmeldung_scrapper'
+require 'byebug'
+require 'tty-prompt'
+
+scrapper = BerlinAnmeldungScrapper::Scrapper.new
+scrapper.run
+byebug
+
+puts 'a'
+
+
