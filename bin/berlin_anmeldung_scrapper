@@ -1,12 +1,54 @@
 #!/usr/bin/env ruby
 require 'berlin_anmeldung_scrapper'
 require 'byebug'
-require 'tty-prompt'
+require 'pry'
+class Script
+  attr_accessor :scrapper, :prompt
 
-scrapper = BerlinAnmeldungScrapper::Scrapper.new
-scrapper.run
-byebug
+  def initialize
+    @scrapper = BerlinAnmeldungScrapper::Scrapper.new
+    @prompt = TTY::Prompt.new
+    scrapper.run
+  end
 
-puts 'a'
+  def search
+    location = prompt.ask("Where do you want to get an appointment?")
+    appointments = scrapper.appointments_for_locations([location])
+    if appointments.empty? 
+      prompt.say("Sorry, couldn't find anything for #{location}")
+    else
+      print_appointments(appointments)
+    end
+  end
 
+  def print_appointments(appointments)
+    prompt.say('These are the (40 first) vailable appointments:')
+    appointments.first(40).each { |appointment| puts appointment }
+  end
 
+  def multiselect
+    msg = 'Select where:(Use arrow keys, press Space to select and Enter to finish)'
+    locations = prompt.multi_select(msg, scrapper.locations, echo: false)
+    appointments = scrapper.appointments_for_locations(locations)
+    print_appointments(appointments)
+  end
+
+  def run
+    loop do
+      action = prompt.select('What do you want to do?') do |menu|
+        menu.choice('Search myself for a location', 1)
+        menu.choice('Select from available locations', 2)
+        menu.choice('Pry - Interactive console', 3)
+        menu.choice('Quit', 4)
+      end
+      case action
+      when 1; then search
+      when 2; then multiselect
+      when 3; then binding.pry
+      when 4; then break
+      end
+    end
+  end
+end
+
+Script.new.run

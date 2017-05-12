@@ -1,43 +1,48 @@
 module BerlinAnmeldungScrapper
   class Scrapper
+    include Capybara::DSL
     INITIAL_PAGE = 'https://service.berlin.de/dienstleistung/120686/'.freeze
-    attr_accessor :b
     def initialize
-      spinner
-      @b = Watir::Browser.new(:chrome)
+      @appointments = []
     end
 
     def run
       spinner.update(title: 'Checking the calendar...')
-      b.goto(INITIAL_PAGE)
-      b.a(text: 'Termin berlinweit suchen').click
-      day_urls = b.as.select { |a| a.text =~ /\d{1,2}/ }.map {|a| a.href }
+      visit(INITIAL_PAGE)
+      click_on('Termin berlinweit suchen')
+      day_urls = all('a').to_a.keep_if { |a| a.text =~ /\d{1,2}/ }
+                              .map {|a| a[:href] }
       spinner.success('Ok, now lets check every single day')
       bar(day_urls.count)
-      @appointments = day_urls.collect do |day_url|
+      day_urls.each do |day_url|
         scrap_day_page(day_url)
         bar.advance
       end
+      bar.finish
     end
 
     def scrap_day_page(url)
-      b.goto(url)
-      date = b.div(text: 'Datum').next_sibling.text
+      visit(url)
+      raise "Too many requests, the burgeramt has catched you. RUN!" if has_text?('429 Calm down')
+      date = all(:xpath, "//div[contains(text(),'Datum')]/following-sibling::div")
+              .first { |datum| datum.text =~ /\w+\.\s\d+\.\s\w+\s\d{4}/ }.text
       time = nil
-      b.div(class: 'timetable').trs.collect do |tr|
+      find('div.timetable').all('tr').first(2).each do |tr|
         # Empty tr represents the same time as the previous appointment
-        time = tr.th.text unless tr.th.text == ''
-        location =  tr.td.text
-        Appointment.new(date, time, location)
+        column_text = tr.find('th').text
+        time = column_text unless column_text == ''
+        location =  tr.find('td').text
+        @appointments << Appointment.new(date, time, location)
+        puts @appointments.last
       end
     end
 
     def locations
-      @appointments.map {|appointment| appointment.location}.uniq
+      @appointments.map { |appointment| appointment.location }.uniq.sort
     end
 
-    def appointments_for_location(location)
-      @appointments.keep_if { |appointment| appointment.location?(location) }
+    def appointments_for_locations(locations)
+      @appointments.keep_if { |appointment| locations.include?(appointment.location) }.sort
     end
 
     private 
@@ -52,7 +57,7 @@ module BerlinAnmeldungScrapper
 
     def spinner
       return @spinner if @spinner
-      @spinner = TTY::Spinner.new("[:spinner] :title", format: :spin_2)
+      @spinner = TTY::Spinner.new(":spinner :title", format: :spin_2)
       @spinner.update(title: 'Starting ...')
       @spinner.auto_spin
       @spinner
