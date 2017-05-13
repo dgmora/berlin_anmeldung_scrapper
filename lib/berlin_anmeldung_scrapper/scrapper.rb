@@ -26,14 +26,17 @@ module BerlinAnmeldungScrapper
       raise "Too many requests, the burgeramt has catched you. RUN!" if has_text?('429 Calm down')
       date = all(:xpath, "//div[contains(text(),'Datum')]/following-sibling::div")
               .first { |datum| datum.text =~ /\w+\.\s\d+\.\s\w+\s\d{4}/ }.text
+      rows = find('div.timetable').all('tr')
+      bar.log(date + " has #{rows.count} appointment(s) available")
       time = nil
-      find('div.timetable').all('tr').first(2).each do |tr|
+      rows.each do |tr|
         # Empty tr represents the same time as the previous appointment
-        column_text = tr.find('th').text
-        time = column_text unless column_text == ''
-        location =  tr.find('td').text
-        @appointments << Appointment.new(date, time, location)
-        puts @appointments.last
+        date_column_text = tr.find('th').text
+        time = date_column_text unless date_column_text == ''
+        location_link =  tr.find('td').find('a')
+        location =  location_link[:text]
+        termin_url =  location_link[:href]
+        @appointments << Appointment.new(date, time, location, termin_url)
       end
     end
 
@@ -42,7 +45,7 @@ module BerlinAnmeldungScrapper
     end
 
     def appointments_for_locations(locations)
-      @appointments.keep_if { |appointment| locations.include?(appointment.location) }.sort
+      @appointments.keep_if { |appointment| appointment.in?(locations) }.sort
     end
 
     private 

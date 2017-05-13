@@ -2,14 +2,21 @@ module BerlinAnmeldungScrapper
   class Appointment
     attr_accessor :date, :time, :location
 
-    def initialize(date, time, location)
+    def initialize(date, time, location, termin_url)
       @date = date
       @time = time
-      @location = clean_location(location)
+      # You want to keep the pretty-name location, so you don't normalize it.
+      @location = clean(location)
+      @termin_url = termin_url
     end
 
-    def location?(location)
-      normalize_location(@location).include?(normalize_location(location))
+    def in?(locations)
+      locations.map do |l|
+        if normalize_location(@location).include?(normalize_location(l))
+          return true
+        end
+      end
+      return false
     end
 
     def to_s
@@ -22,7 +29,7 @@ module BerlinAnmeldungScrapper
 
     private 
 
-    def clean_location(location)
+    def clean(location)
       # Bürgeramt 1 <location>
       # Bürgeramt <location>
       # Remove parentheses and 'buergeramt' from location

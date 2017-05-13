@@ -1,13 +1,27 @@
-# BerlinAnmeldungScrapper
+# Berlin Anmeldung Scrapper
 
-...Because manually finding where/when to go is a pain on the ass
+You're in berlin and you want to
+[register as a citzen (anmeldung)?](https://service.berlin.de/dienstleistung/120686/)
+
+Instead of going through the calendar and finding out that all the appointments
+are damn far away, with this CLI you can easily find where and when to go.
 
 ## Installation and Usage
 
 Add this line to your application's Gemfile:
 
-```ruby
-$ gem install 'berlin_anmeldung_scrapper'
+```bash
+$ gem install berlin_anmeldung_scrapper
+$ berlin_anmeldung_scrapper
+```
+
+or if you want to fiddle a bit more with it:
+
+```bash
+$ git clone git@github.com:dgmora/berlin_anmeldung_scrapper.git
+$ cd berlin_anmeldung_scrapper
+$ bundle install
+$ rake install
 $ berlin_anmeldung_scrapper
 ```
 

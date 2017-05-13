@@ -9,23 +9,20 @@ Gem::Specification.new do |spec|
   spec.authors       = ['David Garcia']
   spec.email         = ['david.garcia.mora@gmail.com']
 
-  spec.summary       = 'Finds you suitable appointments to register as Berlin citzen'
-  spec.description   = 'Finds you suitable appointments to register as Berlin citzen'
+  spec.summary       = 'Finds you suitable appointments to register as a Berlin citzen'
+  spec.description   = 'Finds you suitable appointments to register as a Berlin citzen'
   spec.homepage      = 'https://github.com/dgmora/berlin_anmeldung_scrapper'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = 'bin'
-  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
+  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
 
   spec.add_runtime_dependency 'capybara', '~> 2.7'
   spec.add_runtime_dependency 'poltergeist', '~> 1.15'
   spec.add_runtime_dependency 'phantomjs-binaries', '~> 2.1'
   spec.add_runtime_dependency 'tty'
-  spec.add_runtime_dependency 'selenium-webdriver'
-  spec.add_runtime_dependency 'chromedriver-helper'
-  spec.add_runtime_dependency 'parallel', '~> 1.0'
   spec.add_runtime_dependency 'pry'
 
   spec.add_development_dependency 'byebug'
