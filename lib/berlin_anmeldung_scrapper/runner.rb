@@ -34,14 +34,12 @@ module BerlinAnmeldungScrapper
         action = @prompt.select('What do you want to do?') do |menu|
           menu.choice('Search myself for a location', 1)
           menu.choice('Select from available locations', 2)
-          menu.choice('Pry - Interactive console', 3)
-          menu.choice('Quit', 4)
+          menu.choice('Quit', 3)
         end
         case action
         when 1; then search
         when 2; then multiselect
-        when 3; then binding.pry
-        when 4; then break
+        when 3; then break
         end
       end
     end
